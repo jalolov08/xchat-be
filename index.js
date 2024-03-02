@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
+const { app, server } = require("./socket/socket.js");
+
 require("dotenv").config();
 const routes = require("./routes");
 mongoose
@@ -18,6 +19,6 @@ app.use("/api", routes);
 app.use("/api/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server started at port ${PORT}`);
 });

@@ -1,5 +1,6 @@
 const Chat = require("../models/chat.model");
 const Message = require("../models/message.model");
+const { getReceiverSocketId, io } = require("../socket/socket");
 async function sendMessage(req, res) {
   try {
     const { id: receiverId } = req.params;
@@ -26,6 +27,11 @@ async function sendMessage(req, res) {
       chat.lastMessage = newMessage.message;
     }
     await Promise.all([chat.save(), newMessage.save()]);
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", { message: newMessage });
+    }
+
     res.status(201).json(newMessage);
   } catch (error) {
     console.error(error);
