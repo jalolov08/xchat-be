@@ -6,9 +6,11 @@ const fileUpload = require("../utils/fileUpload");
 const avatarUpload = fileUpload("avatar", ["image/jpeg", "image/png"]);
 router.post(
   "/upload/avatar",
-  checkAuth,
   avatarUpload.single("image"),
   (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
     res.json({ url: `/api/uploads/avatar/${req.file.filename}` });
   }
 );

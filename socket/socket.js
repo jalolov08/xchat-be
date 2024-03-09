@@ -5,8 +5,17 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const jwt = require("jsonwebtoken");
+const Chat = require("../models/chat.model");
 require("dotenv").config();
 const secretKey = process.env.JWT_SECRET;
+async function getUserChats(userId) {
+  try {
+    const chats = await Chat.find({ participants: userId });
+    io.to(userSocketMap[userId]).emit("chats", chats);
+  } catch (error) {
+    console.error("Error chats:", error);
+  }
+}
 
 function getReceiverSocketId(receiverId) {
   return userSocketMap[receiverId];
@@ -22,9 +31,10 @@ io.on("connection", (socket) => {
         return;
       }
       const userId = decoded._id;
-    //   console.log("User ID:", userId);
+      //   console.log("User ID:", userId);
       if (userId) userSocketMap[userId] = socket.id;
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
+      getUserChats(userId);
     });
   }
 
@@ -39,4 +49,4 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
-module.exports = { app, io, server, getReceiverSocketId };
+module.exports = { app, io, server, getReceiverSocketId, getUserChats };

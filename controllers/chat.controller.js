@@ -1,6 +1,6 @@
 const Chat = require("../models/chat.model");
 const Message = require("../models/message.model");
-const { getReceiverSocketId, io } = require("../socket/socket");
+const { getReceiverSocketId, io, getUserChats } = require("../socket/socket");
 async function sendMessage(req, res) {
   try {
     const { id: receiverId } = req.params;
@@ -13,7 +13,10 @@ async function sendMessage(req, res) {
       chat = await Chat.create({
         participants: [senderId, receiverId],
       });
+      getUserChats(senderId);
+      getUserChats(receiverId);
     }
+
     const newMessage = new Message({
       senderId,
       receiverId,
@@ -103,10 +106,21 @@ async function deleteChat(req, res) {
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 }
+async function getMyChats(req, res) {
+  try {
+    const userId = req.user._id;
+    const chats = await Chat.find({ participants: userId });
+    res.status(200).json(chats);
+  } catch (error) {
+    console.error("Error fetching chats:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 module.exports = {
   sendMessage,
   getMessages,
   deleteMessages,
   deleteChat,
+  getMyChats
 };

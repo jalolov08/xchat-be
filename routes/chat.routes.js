@@ -4,6 +4,7 @@ const chatController = require("../controllers/chat.controller");
 const checkAuth = require("../utils/checkAuth");
 router.post("/send/:id", checkAuth, chatController.sendMessage);
 router.get("/:id", checkAuth, chatController.getMessages);
+router.get("/", checkAuth, chatController.getMyChats);
 router.delete("/delete", checkAuth, chatController.deleteMessages);
 router.delete("/delete/all/:id", checkAuth, chatController.deleteChat);
 module.exports = router;

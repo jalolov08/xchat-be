@@ -54,11 +54,11 @@ async function syncContacts(req, res) {
   try {
     const { phones } = req.body;
 
-    if (!phones || !Array.isArray(phones) || phones.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Массив номеров отсутствует или пуст" });
-    }
+    // if (!phones || !Array.isArray(phones) || phones.length === 0) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Массив номеров отсутствует или пуст" });
+    // }
 
     const users = await User.find({ phone: { $in: phones } });
 
