@@ -31,7 +31,6 @@ io.on("connection", (socket) => {
         return;
       }
       const userId = decoded._id;
-      //   console.log("User ID:", userId);
       if (userId) userSocketMap[userId] = socket.id;
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
       getUserChats(userId);

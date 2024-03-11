@@ -34,7 +34,7 @@ async function sendMessage(req, res) {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", { message: newMessage });
     }
-
+    await Promise.all([getUserChats(senderId), getUserChats(receiverId)]);
     res.status(201).json(newMessage);
   } catch (error) {
     console.error(error);
@@ -122,5 +122,5 @@ module.exports = {
   getMessages,
   deleteMessages,
   deleteChat,
-  getMyChats
+  getMyChats,
 };
