@@ -1,3 +1,4 @@
+const Chat = require("../models/chat.model");
 const User = require("../models/user.model");
 
 async function changeProfile(req, res) {
@@ -24,6 +25,15 @@ async function changeProfile(req, res) {
     if (!updatedUser) {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
+
+    await Chat.updateMany(
+      { "participantDetails.user": user._id },
+      {
+        $set: {
+          "participantDetails.$.fullName": name,
+        },
+      }
+    );
 
     res.status(200).json({ updatedUser });
   } catch (error) {

@@ -1,5 +1,6 @@
 const Chat = require("../models/chat.model");
 const Message = require("../models/message.model");
+const User = require("../models/user.model");
 const { getReceiverSocketId, io, getUserChats } = require("../socket/socket");
 async function sendMessage(req, res) {
   try {
@@ -12,6 +13,20 @@ async function sendMessage(req, res) {
     if (!chat) {
       chat = await Chat.create({
         participants: [senderId, receiverId],
+      });
+      const senderDetails = await User.findById(senderId);
+      const receiverDetails = await User.findById(receiverId);
+
+      chat.participantDetails.push({
+        user: senderId,
+        photo: senderDetails.photoUri,
+        fullName: senderDetails.name,
+      });
+
+      chat.participantDetails.push({
+        user: receiverId,
+        photo: receiverDetails.photoUri,
+        fullName: receiverDetails.name,
       });
       getUserChats(senderId);
       getUserChats(receiverId);
@@ -29,6 +44,9 @@ async function sendMessage(req, res) {
       chat.messages.push(newMessage._id);
       chat.lastMessage = newMessage.message;
     }
+    const senderDetails = await User.findById(senderId);
+    const receiverDetails = await User.findById(receiverId);
+
     await Promise.all([chat.save(), newMessage.save()]);
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
