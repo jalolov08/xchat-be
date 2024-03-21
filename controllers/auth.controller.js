@@ -54,7 +54,8 @@ async function verify(req, res) {
 
     if (!otp || otp.verificationAttempts >= 5) {
       return res.status(400).json({
-        error: "Превышено ограничение на количество попыток верификации или указан неверный номер телефона",
+        error:
+          "Превышено ограничение на количество попыток верификации или указан неверный номер телефона",
       });
     }
 
@@ -79,7 +80,16 @@ async function verify(req, res) {
   }
 }
 
+async function getMe(req, res) {
+  try {
+    const user = req.user;
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
+}
 module.exports = {
   login,
   verify,
+  getMe
 };
