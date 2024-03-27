@@ -5,7 +5,7 @@ const { getReceiverSocketId, io, getUserChats } = require("../socket/socket");
 async function sendMessage(req, res) {
   try {
     const { id: receiverId } = req.params;
-    const { message, messageType, uri, answerFor } = req.body;
+    const { message, messageType, answerFor } = req.body;
     const senderId = req.user._id;
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
@@ -20,13 +20,13 @@ async function sendMessage(req, res) {
       chat.participantDetails.push({
         user: senderId,
         photo: senderDetails.photoUri,
-        fullName: senderDetails.name,
+        fullName: `${senderDetails.name} ${senderDetails.name}`,
       });
 
       chat.participantDetails.push({
         user: receiverId,
         photo: receiverDetails.photoUri,
-        fullName: receiverDetails.name,
+        fullName: `${receiverDetails.name} ${receiverDetails.surname}`,
       });
       getUserChats(senderId);
       getUserChats(receiverId);
@@ -37,7 +37,10 @@ async function sendMessage(req, res) {
       receiverId,
       message,
       messageType,
-      uri,
+      uri:
+        messageType === "image" || messageType === "document"
+          ? `/api/${req.file.path}`
+          : null,
       answerFor,
     });
     if (newMessage) {
