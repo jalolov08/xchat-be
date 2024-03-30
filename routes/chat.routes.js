@@ -24,4 +24,5 @@ router.get("/:id", checkAuth, chatController.getMessages);
 router.get("/", checkAuth, chatController.getMyChats);
 router.delete("/delete", checkAuth, chatController.deleteMessages);
 router.delete("/delete/all/:id", checkAuth, chatController.deleteChat);
+router.put("/:messageId/viewed", checkAuth, chatController.markMessageAsViewed);
 module.exports = router;

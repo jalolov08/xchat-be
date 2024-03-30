@@ -137,6 +137,34 @@ async function getMyChats(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function markMessageAsViewed(req, res) {
+  try {
+    const messageId = req.params.messageId;
+    const userId = req.user._id;
+
+    const message = await Message.findOneAndUpdate(
+      { _id: messageId, receiverId: userId },
+      { viewed: true },
+      { new: true }
+    );
+
+    if (!message) {
+      return res
+        .status(404)
+        .json({ error: "Сообщение не найдено или не принадлежит вам" });
+    }
+
+    const receiverSocketId = getReceiverSocketId(message.senderId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageViewed", message);
+    }
+
+    res.status(200).json({ message: "Просмотрено" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
+}
 
 module.exports = {
   sendMessage,
@@ -144,4 +172,5 @@ module.exports = {
   deleteMessages,
   deleteChat,
   getMyChats,
+  markMessageAsViewed,
 };

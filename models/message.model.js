@@ -31,6 +31,7 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
     },
+    viewed: { type: Boolean, default: false },
     uri: {
       type: String,
       required: function () {
