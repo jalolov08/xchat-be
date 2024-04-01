@@ -17,4 +17,5 @@ router.post(
 router.post("/change", checkAuth, userController.changeProfile);
 router.get("/:userId", checkAuth, userController.getUserInfo);
 router.post("/sync", checkAuth, userController.syncContacts);
+router.post("/block" , checkAuth, userController.userBlock)
 module.exports = router;

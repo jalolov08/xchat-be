@@ -16,6 +16,14 @@ const UserSchema = new mongoose.Schema(
       unique: true,
     },
     photoUri: String,
+    photoUri: String,
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default:[],
+      },
+    ],
   },
   {
     timestamps: true,

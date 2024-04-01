@@ -80,9 +80,40 @@ async function syncContacts(req, res) {
     });
   }
 }
+async function userBlock(req, res) {
+  try {
+    const { userId } = req.body;
+    const currentUserId = req.user._id;
+
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    const index = currentUser.blockedUsers.indexOf(userId);
+    if (index !== -1) {
+      currentUser.blockedUsers.splice(index, 1);
+      await currentUser.save();
+      res.status(200).json({ message: "Пользователь успешно разблокирован" });
+    } else {
+      currentUser.blockedUsers.push(userId);
+      await currentUser.save();
+      res.status(200).json({ message: "Пользователь успешно заблокирован" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
+}
 
 module.exports = {
   changeProfile,
   getUserInfo,
   syncContacts,
+  userBlock,
 };

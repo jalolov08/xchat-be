@@ -7,6 +7,17 @@ async function sendMessage(req, res) {
     const { id: receiverId } = req.params;
     const { message, messageType, answerFor } = req.body;
     const senderId = req.user._id;
+    const senderDetails = await User.findById(senderId);
+    const receiverDetails = await User.findById(receiverId);
+
+    if (receiverDetails.blockedUsers.includes(senderId)) {
+      return res
+        .status(403)
+        .json({
+          error:
+            "Вы заблокированы этим пользователем и не можете отправлять сообщения.",
+        });
+    }
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
@@ -47,9 +58,7 @@ async function sendMessage(req, res) {
       chat.messages.push(newMessage._id);
       chat.lastMessage = newMessage.message;
     }
-    const senderDetails = await User.findById(senderId);
-    const receiverDetails = await User.findById(receiverId);
-
+   
     await Promise.all([chat.save(), newMessage.save()]);
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
@@ -143,7 +152,7 @@ async function markMessageAsViewed(req, res) {
     const userId = req.user._id;
 
     const message = await Message.findOneAndUpdate(
-      { _id: messageId, receiverId: userId },
+      { _id: messageId, receiverId: userId, viewed: false },
       { viewed: true },
       { new: true }
     );
@@ -151,7 +160,7 @@ async function markMessageAsViewed(req, res) {
     if (!message) {
       return res
         .status(404)
-        .json({ error: "Сообщение не найдено или не принадлежит вам" });
+        .json({ error: "Сообщение не найдено или уже прочитано" });
     }
 
     const receiverSocketId = getReceiverSocketId(message.senderId);
@@ -159,7 +168,7 @@ async function markMessageAsViewed(req, res) {
       io.to(receiverSocketId).emit("messageViewed", message);
     }
 
-    res.status(200).json({ message: "Просмотрено" });
+    res.status(200).json(message);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
