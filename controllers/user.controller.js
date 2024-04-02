@@ -42,24 +42,6 @@ async function changeProfile(req, res) {
   }
 }
 
-async function getUserInfo(req, res) {
-  try {
-    const { userId } = req.params;
-
-    const userInfo = await User.findById(userId);
-
-    if (!userInfo) {
-      return res.status(404).json({ message: "Пользователь не найден" });
-    }
-
-    res.status(200).json({ userInfo });
-  } catch (error) {
-    console.error("Ошибка при получении информации о пользователе:", error);
-    res.status(500).json({
-      message: "Произошла ошибка при получении информации о пользователе",
-    });
-  }
-}
 async function syncContacts(req, res) {
   try {
     const { phones } = req.body;
@@ -110,10 +92,24 @@ async function userBlock(req, res) {
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 }
+async function getBlockedUsers(req, res) {
+  try {
+    const currentUserId = req.user._id;
+    const currentUser = await User.findById(currentUserId);
 
+    if (!currentUser) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    res.status(200).json(currentUser.blockedUsers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
+}
 module.exports = {
   changeProfile,
-  getUserInfo,
   syncContacts,
   userBlock,
+  getBlockedUsers,
 };

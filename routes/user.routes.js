@@ -15,7 +15,8 @@ router.post(
   }
 );
 router.post("/change", checkAuth, userController.changeProfile);
-router.get("/:userId", checkAuth, userController.getUserInfo);
 router.post("/sync", checkAuth, userController.syncContacts);
 router.post("/block" , checkAuth, userController.userBlock)
+router.get("/blocked" , checkAuth, userController.getBlockedUsers)
+
 module.exports = router;

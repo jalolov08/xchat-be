@@ -11,12 +11,10 @@ async function sendMessage(req, res) {
     const receiverDetails = await User.findById(receiverId);
 
     if (receiverDetails.blockedUsers.includes(senderId)) {
-      return res
-        .status(403)
-        .json({
-          error:
-            "Вы заблокированы этим пользователем и не можете отправлять сообщения.",
-        });
+      return res.status(403).json({
+        error:
+          "Вы заблокированы этим пользователем и не можете отправлять сообщения.",
+      });
     }
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
@@ -56,9 +54,11 @@ async function sendMessage(req, res) {
     });
     if (newMessage) {
       chat.messages.push(newMessage._id);
-      chat.lastMessage = newMessage.message;
+      if (messageType !== "image" && messageType !== "document") {
+        chat.lastMessage = newMessage.message;
+      }
     }
-   
+
     await Promise.all([chat.save(), newMessage.save()]);
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
@@ -71,6 +71,7 @@ async function sendMessage(req, res) {
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 }
+
 async function getMessages(req, res) {
   try {
     const { id: userToChatId } = req.params;
@@ -90,10 +91,11 @@ async function deleteMessages(req, res) {
   try {
     const { messageIds } = req.body;
     const senderId = req.user._id;
-
     const messages = await Message.find({
-      _id: { $in: messageIds },
-      senderId: senderId,
+      $or: [
+        { _id: { $in: messageIds }, senderId: senderId },
+        { _id: { $in: messageIds }, receiverId: senderId },
+      ],
     });
 
     if (!messages || messages.length === 0) {
@@ -121,19 +123,19 @@ async function deleteChat(req, res) {
     });
 
     if (!chat) {
-      return res.status(404).json({ error: "Чат не найден" });
+      return res.status(404).json({ message: "Чат не найден" });
     }
 
     if (!chat.participants.includes(senderId)) {
       return res
         .status(403)
-        .json({ error: "Вы не имеете права удалять этот чат" });
+        .json({ message: "Вы не имеете права удалять этот чат" });
     }
 
     res.status(200).json({ message: "Чат успешно удален" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    res.status(500).json({ message: "Внутренняя ошибка сервера" });
   }
 }
 async function getMyChats(req, res) {

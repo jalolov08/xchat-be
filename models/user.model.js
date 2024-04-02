@@ -15,13 +15,15 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    photoUri: String,
-    photoUri: String,
+    photoUri: {
+      type: String,
+      default: "/api/uploads/avatar/user.png",
+    },
     blockedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        default:[],
+        default: [],
       },
     ],
   },
