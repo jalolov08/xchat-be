@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "/api/uploads/avatar/user.png",
     },
+    fcmToken: {
+      type: String,
+      required: false,
+    },
     blockedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,

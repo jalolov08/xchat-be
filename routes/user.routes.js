@@ -18,5 +18,5 @@ router.post("/change", checkAuth, userController.changeProfile);
 router.post("/sync", checkAuth, userController.syncContacts);
 router.post("/block" , checkAuth, userController.userBlock)
 router.get("/blocked" , checkAuth, userController.getBlockedUsers)
-
+router.post("/fcmToken" , checkAuth, userController.uploadFcmToken)
 module.exports = router;

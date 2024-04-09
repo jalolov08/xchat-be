@@ -4,6 +4,13 @@ const { app, server } = require("./socket/socket.js");
 
 require("dotenv").config();
 const routes = require("./routes");
+
+const admin = require('firebase-admin');
+
+const serviceAccount = require('./xchat-f9259-firebase-adminsdk-l6e1s-1b81cf4cd0.json'); 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 mongoose
   .connect(process.env.MONGODB_URI, {})
   .then(() => {

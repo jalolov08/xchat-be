@@ -6,10 +6,6 @@ async function changeProfile(req, res) {
     const { name, surname, photoUri } = req.body;
     const user = req.user;
 
-    if (!name || !surname || !photoUri) {
-      return res.status(400).json({ message: "Не все поля заполнены" });
-    }
-
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       {
@@ -107,9 +103,30 @@ async function getBlockedUsers(req, res) {
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 }
+
+async function uploadFcmToken(req, res) {
+  const { fcmToken } = req.body;
+
+  try {
+    const currentUser = req.user;
+
+    await User.findOneAndUpdate(
+      { _id: currentUser._id },
+      { $set: { fcmToken: fcmToken } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "FCM token uploaded successfully" });
+  } catch (error) {
+    console.error("Error uploading FCM token:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   changeProfile,
   syncContacts,
   userBlock,
   getBlockedUsers,
+  uploadFcmToken,
 };

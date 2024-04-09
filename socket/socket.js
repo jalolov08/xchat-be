@@ -22,9 +22,7 @@ function getReceiverSocketId(receiverId) {
 }
 const userSocketMap = {};
 io.on("connection", (socket) => {
-  console.log("user connected", socket.id);
   const token = socket.handshake.query.token;
-  console.log(token);
   if (token) {
     jwt.verify(token, secretKey, (err, decoded) => {
       if (err) {
@@ -32,7 +30,6 @@ io.on("connection", (socket) => {
         return;
       }
       const userId = decoded._id;
-      console.log(userId);
       if (userId) userSocketMap[userId] = socket.id;
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
       getUserChats(userId);
@@ -40,7 +37,6 @@ io.on("connection", (socket) => {
   }
 
   socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
     for (const userId in userSocketMap) {
       if (userSocketMap[userId] === socket.id) {
         delete userSocketMap[userId];

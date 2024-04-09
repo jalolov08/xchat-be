@@ -2,6 +2,8 @@ const Chat = require("../models/chat.model");
 const Message = require("../models/message.model");
 const User = require("../models/user.model");
 const { getReceiverSocketId, io, getUserChats } = require("../socket/socket");
+const sendNotification = require("../utils/sendNotification");
+
 async function sendMessage(req, res) {
   try {
     const { id: receiverId } = req.params;
@@ -60,10 +62,27 @@ async function sendMessage(req, res) {
     }
 
     await Promise.all([chat.save(), newMessage.save()]);
+
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", { message: newMessage });
     }
+    const senderData = {
+      _id: senderDetails._id.toString(),
+      fullName: `${senderDetails.name} ${senderDetails.surname}`,
+      photo: senderDetails.photoUri,
+      user: senderDetails._id.toString(),
+    };
+    await sendNotification(
+      receiverDetails.fcmToken,
+      senderData.fullName,
+      newMessage.message,
+      {
+        ...senderData,
+        messageType: newMessage.messageType,
+        uri: `${process.env.API}${newMessage.uri}`,
+      }
+    );
     await Promise.all([getUserChats(senderId), getUserChats(receiverId)]);
     res.status(201).json(newMessage);
   } catch (error) {
