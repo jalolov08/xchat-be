@@ -30,6 +30,10 @@ const chatSchema = new mongoose.Schema(
         fullName: {
           type: String,
         },
+        phone:{
+          type: String,
+
+        }
       },
     ],
   },

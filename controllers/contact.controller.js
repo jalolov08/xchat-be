@@ -1,5 +1,4 @@
 const Contact = require("../models/contact.model");
-
 async function upload(req, res) {
   try {
     const contactsData = req.body.contacts;
@@ -9,34 +8,35 @@ async function upload(req, res) {
         const { displayName, familyName, givenName, phoneNumbers } =
           contactData;
 
-        const existingContact = await Contact.findOne({
-          userId: req.user._id,
-          displayName: displayName,
-        });
-
-        if (existingContact) {
-          existingContact.familyName = familyName;
-          existingContact.givenName = givenName;
-          existingContact.phoneNumbers = phoneNumbers;
-
-          await existingContact.save();
+        try {
+          const existingContact = await Contact.findOneAndUpdate(
+            {
+              userId: req.user._id,
+              displayName: displayName,
+            },
+            {
+              familyName: familyName,
+              givenName: givenName,
+              phoneNumbers: phoneNumbers,
+            },
+            {
+              upsert: true,
+              new: true,
+              setDefaultsOnInsert: true,
+            }
+          );
 
           return existingContact;
-        } else {
-          const contact = new Contact({
-            userId: req.user._id,
-            displayName,
-            familyName,
-            givenName,
-            phoneNumbers,
-          });
-
-          await contact.save();
-
-          return contact;
+        } catch (err) {
+          if (err instanceof mongoose.Error.VersionError) {
+            return upload(req, res);
+          } else {
+            throw err;
+          }
         }
       })
     );
+
     res.status(201).json({ message: "Contacts uploaded successfully" });
   } catch (err) {
     console.error("Error uploading contacts:", err);

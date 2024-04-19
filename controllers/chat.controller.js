@@ -32,12 +32,14 @@ async function sendMessage(req, res) {
         user: senderId,
         photo: senderDetails.photoUri,
         fullName: `${senderDetails.name} ${senderDetails.name}`,
+        phone:senderDetails.phone
       });
 
       chat.participantDetails.push({
         user: receiverId,
         photo: receiverDetails.photoUri,
         fullName: `${receiverDetails.name} ${receiverDetails.surname}`,
+        phone:receiverDetails.phone
       });
       getUserChats(senderId);
       getUserChats(receiverId);
@@ -58,9 +60,13 @@ async function sendMessage(req, res) {
       chat.messages.push(newMessage._id);
       if (messageType !== "image" && messageType !== "document") {
         chat.lastMessage = newMessage.message;
+      } else if (messageType === "image") {
+        chat.lastMessage = "Фото";
+      } else if (messageType === "document") {
+        chat.lastMessage = "Документ";
       }
     }
-
+    
     await Promise.all([chat.save(), newMessage.save()]);
 
     const receiverSocketId = getReceiverSocketId(receiverId);
