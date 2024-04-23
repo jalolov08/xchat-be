@@ -32,14 +32,14 @@ async function sendMessage(req, res) {
         user: senderId,
         photo: senderDetails.photoUri,
         fullName: `${senderDetails.name} ${senderDetails.name}`,
-        phone:senderDetails.phone
+        phone: senderDetails.phone,
       });
 
       chat.participantDetails.push({
         user: receiverId,
         photo: receiverDetails.photoUri,
         fullName: `${receiverDetails.name} ${receiverDetails.surname}`,
-        phone:receiverDetails.phone
+        phone: receiverDetails.phone,
       });
       getUserChats(senderId);
       getUserChats(receiverId);
@@ -66,7 +66,7 @@ async function sendMessage(req, res) {
         chat.lastMessage = "Документ";
       }
     }
-    
+
     await Promise.all([chat.save(), newMessage.save()]);
 
     const receiverSocketId = getReceiverSocketId(receiverId);
@@ -201,6 +201,22 @@ async function markMessageAsViewed(req, res) {
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 }
+async function getStats(req, res) {
+  try {
+      const chatCount = await Chat.countDocuments();
+      const messageCount = await Message.countDocuments();
+      const userCount = await User.countDocuments();
+
+      res.json({
+          chatCount,
+          messageCount,
+          userCount
+      });
+  } catch (error) {
+      console.error("Error while fetching stats:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 module.exports = {
   sendMessage,
@@ -209,4 +225,5 @@ module.exports = {
   deleteChat,
   getMyChats,
   markMessageAsViewed,
+  getStats,
 };

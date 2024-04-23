@@ -30,12 +30,16 @@ const chatSchema = new mongoose.Schema(
         fullName: {
           type: String,
         },
-        phone:{
+        phone: {
           type: String,
-
-        }
+        },
       },
     ],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      expires: 2592000,
+    },
   },
   { timestamps: true }
 );

@@ -5,6 +5,7 @@ function generateToken(user) {
     {
       _id: user._id,
       phone: user.phone,
+      role: user.role,
     },
     process.env.JWT_SECRET,
     { algorithm: "HS256", expiresIn: "4y" }

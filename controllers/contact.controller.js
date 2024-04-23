@@ -43,7 +43,29 @@ async function upload(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+async function getUserContacts(req, res) {
+  try {
+    const contacts = await Contact.find({ userId: req.params.userId });
 
+    res.status(200).json({ contacts });
+  } catch (error) {
+    console.error("Error fetching user contacts:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getAllContacts(req, res) {
+  try {
+    const contacts = await Contact.find({});
+
+    res.status(200).json({ contacts });
+  } catch (error) {
+    console.error("Error fetching all contacts:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
 module.exports = {
   upload,
+  getUserContacts,
+  getAllContacts,
 };
